@@ -1,9 +1,4 @@
 
-
-library(dplyr)
-library(tidyr)
-library(readr)
-
 # Reading test data
 subject_test <- read_table('subject_test.txt', col_names = FALSE)
 X_test <- read_table('X_test.txt', col_names = FALSE)
