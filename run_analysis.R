@@ -1,16 +1,21 @@
 
+###########################################################################
 # Reading test data
+###########################################################################
 subject_test <- read_table('subject_test.txt', col_names = FALSE)
 X_test <- read_table('X_test.txt', col_names = FALSE)
 y_test <- read_table('y_test.txt', col_names = FALSE)
 
+###########################################################################
 # Reading train data
+###########################################################################
 subject_train <- read_table('subject_train.txt', col_names = FALSE)
 X_train <- read_table('X_train.txt', col_names = FALSE)
 y_train <- read_table('y_train.txt', col_names = FALSE)
 
-
-## Reading Feature Data
+############################################################################
+# Reading Feature Data
+############################################################################
 features <- read_delim('features.txt', col_names = FALSE, delim = " ")
 colnames(features) <- c('id', 'variable')
 
@@ -19,46 +24,57 @@ features <- features %>%
   mutate(tot = n(),
          num = 1:n())
 
-
-## Creating unique names for features variables
+#############################################################################
+# Creating unique names for features variables
+#############################################################################
 features <- features %>%
   ungroup() %>%
   mutate(variable = ifelse(tot > 1, paste0(variable,'-',num), variable))
 
 
-
-## Adding variable names to columns
+###############################################################################
+# Adding variable names to columns
+###############################################################################
 colnames(subject_test) <- 'subject'
 colnames(X_test) <- features$variable
 colnames(y_test) <- 'activity'
 
-## Binding subject and test database
+################################################################################
+# Binding subject and test database
+################################################################################
 test <- bind_cols(subject_test, y_test) %>%
   mutate(source = 'test') %>%
   bind_cols(X_test)
 
 
 
-
-## Add variable names to columns
+#################################################################################
+# Add variable names to columns
+#################################################################################
 colnames(subject_train) <- 'subject'
 colnames(X_train) <- features$variable
 colnames(y_train) <- 'activity'
 
-## Bind subject and train database
+##################################################################################
+# Bind subject and train database
+##################################################################################
 train <- bind_cols(subject_train, y_train) %>%
   mutate(source = 'train') %>%
   bind_cols(X_train)
-
-## Binding test and train database
+##################################################################################
+# Binding test and train database
+##################################################################################
 dataset <- bind_rows(test, train)
 
-# Extracting only the measurements on the mean and standard deviation for each measurement. 
-
+##########################################################################################
+# Filtering required measurements on the mean and standard deviation for each measurement. 
+##########################################################################################
 dataset_filter <- dataset %>%
   select(subject, activity, source, matches('mean\\(|std\\('))
 
-# Uses descriptive activity names to name the activities in the data set.
+###########################################################################################
+# Using descriptive activity names to name the activities in the data set.
+###########################################################################################
 
 dataset_filter$activity <- factor(dataset_filter$activity, 
                                   levels = c(1, 2, 3, 4, 5, 6), 
@@ -71,10 +87,11 @@ dataset_filter$activity <- factor(dataset_filter$activity,
 
 dataset_filter$source <- as.factor(dataset_filter$source)
 table(dataset_filter$source)
-
+################################################################################
 # Appropriately labels the data set with descriptive variable names. 
+################################################################################]
 
-## Seting up labels for mean varabiables
+# Mean varabiables
 attributes(dataset_filter$`tBodyAcc-mean()-X`)$label <- 'time Body Accelerometer X-axial signal - mean'
 attributes(dataset_filter$`tBodyAcc-mean()-Y`)$label <- 'time Body Accelerometer Y-axial signal - mean'
 attributes(dataset_filter$`tBodyAcc-mean()-Z`)$label <- 'time Body Accelerometer Z-axial signal - mean'
@@ -109,7 +126,7 @@ attributes(dataset_filter$`fBodyBodyAccJerkMag-mean()`)$label 		 <- 'frecuency B
 attributes(dataset_filter$`fBodyBodyGyroMag-mean()`)$label 		 <- 'frecuency Body Gyroscope magnitude signal - mean'
 attributes(dataset_filter$`fBodyBodyGyroJerkMag-mean()`)$label 		 <- 'frecuency Body Gyroscope Jerk magnitude signal - mean'
 
-## Seting up labels for Standard deviation varabiables
+# SD varabiables
 attributes(dataset_filter$`tBodyAcc-std()-X`)$label <- 'time Body Accelerometer X-axial signal - Standard deviation'
 attributes(dataset_filter$`tBodyAcc-std()-Y`)$label <- 'time Body Accelerometer Y-axial signal - Standard deviation'
 attributes(dataset_filter$`tBodyAcc-std()-Z`)$label <- 'time Body Accelerometer Z-axial signal - Standard deviation'
@@ -144,8 +161,9 @@ attributes(dataset_filter$`fBodyBodyAccJerkMag-std()`)$label 		 <- 'frecuency Bo
 attributes(dataset_filter$`fBodyBodyGyroMag-std()`)$label 		 <- 'frecuency Body Gyroscope magnitude signal - Standard deviation'
 attributes(dataset_filter$`fBodyBodyGyroJerkMag-std()`)$label 		 <- 'frecuency Body Gyroscope Jerk magnitude signal - Standard deviation'
 
-# From the data set in step 4, creates a second, independent tidy data set with 
+############################################################################################
 # the average of each variable for each activity and each subject.
+############################################################################################
 
 final_data <- dataset_filter %>%
   group_by(subject, activity, source) %>%
